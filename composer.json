@@ -1,0 +1,21 @@
+{
+    "name": "ratiw/api",
+    "description": "A simple Laravel API package.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rati Wannapanop",
+            "email": "rati.wannapanop@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+		"league/fractal": "0.9.*",
+        "laravel/framework": "4.2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ratiw\\Api": "src/"
+        }
+    }
+}
