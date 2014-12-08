@@ -14,6 +14,8 @@ class BaseApiController extends ApiController
     protected $sortColumn = 'id';
     protected $sortDirection = 'asc';
 
+    protected $includes = [];
+
     function __construct(Application $app, Manager $fractal)
     {
         parent::__construct($fractal);
@@ -71,7 +73,7 @@ class BaseApiController extends ApiController
 
         if (empty($q))
         {
-            $data = $this->model
+            $data = $this->model->with($this->includes)
                 ->where(function($query) use($filters) {
                     $this->setFilters($query, $filters);
                 })
@@ -93,7 +95,7 @@ class BaseApiController extends ApiController
 
     protected function search($query)
     {
-        return $this->model->where('code', 'like', "$query%");
+        return $this->model->with($this->includes)->where('code', 'like', "$query%");
     }
 
     public function show($id)

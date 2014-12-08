@@ -1,6 +1,5 @@
 <?php namespace Ratiw\Api;
 
-use Config;
 use Request;
 use Exception;
 use Illuminate\Http\Response;
@@ -40,9 +39,9 @@ class ApiController extends \Controller
 
         $this->fractal = $fractal;
 
-        if (Request::has('embed'))
+        if (Request::has('include'))
         {
-            $this->fractal->setRequestedScopes(explode(',', Request::get('embed')));
+            $this->fractal->parseIncludes(Request::get('include'));
         }
     }
 
@@ -60,13 +59,13 @@ class ApiController extends \Controller
     {
         return in_array(
             $host,
-            Config::get('api.allow_hosts', 'localhost')
+            \Config::get('api.allow_hosts', 'localhost')
         );
     }
 
     public function checkAllowablePaths()
     {
-        $allowablePaths = Config::get('api.allow_paths', 'api/*');
+        $allowablePaths = \Config::get('api.allow_paths', 'api/*');
 
         foreach ($allowablePaths as $path)
         {
