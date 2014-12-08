@@ -1,9 +1,9 @@
 <?php namespace Ratiw\Api;
 
+use Config;
 use Request;
 use Exception;
 use Illuminate\Http\Response;
-use Illuminate\Config\Repository as Config;
 use League\Fractal\Manager;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Resource\Collection;
@@ -60,13 +60,13 @@ class ApiController extends \Controller
     {
         return in_array(
             $host,
-            Config::get('api.allow_hosts')
+            Config::get('api.allow_hosts', 'localhost')
         );
     }
 
     public function checkAllowablePaths()
     {
-        $allowablePaths = Config::get('api.allow_paths');
+        $allowablePaths = Config::get('api.allow_paths', 'api/*');
 
         foreach ($allowablePaths as $path)
         {
