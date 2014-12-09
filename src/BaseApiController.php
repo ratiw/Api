@@ -14,7 +14,7 @@ class BaseApiController extends ApiController
     protected $sortColumn = 'id';
     protected $sortDirection = 'asc';
 
-    protected $includes = [];
+    protected $eagerLoads = [];
 
     function __construct(Application $app, Manager $fractal)
     {
@@ -73,7 +73,7 @@ class BaseApiController extends ApiController
 
         if (empty($q))
         {
-            $data = $this->model->with($this->includes)
+            $data = $this->query()
                 ->where(function($query) use($filters) {
                     $this->setFilters($query, $filters);
                 })
@@ -82,7 +82,7 @@ class BaseApiController extends ApiController
         }
         else
         {
-            $data = $this->search($q)
+            $data = $this->search($this->query(), $q)
                 ->where(function($query) use($filters) {
                     $this->setFilters($query, $filters);
                 })
@@ -93,9 +93,14 @@ class BaseApiController extends ApiController
         return $this->respondWithPagination($data, new $this->transformer, $meta);
     }
 
-    protected function search($query)
+    protected function query()
     {
-        return $this->model->with($this->includes)->where('code', 'like', "$query%");
+        return $this->model->with($this->eagerLoads);
+    }
+
+    protected function search($query, $searchStr)
+    {
+        return $query->where('code', 'like', "$searchStr%");
     }
 
     public function show($id)
