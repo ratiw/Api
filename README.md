@@ -106,7 +106,7 @@ By default, the API package comes ready with two methods
 - __index()__ for querying the collection
 - __show()__ for querying specific item
 
-You should be able to test it via your browser. Just go to http://localhost or http://localhost:8000 or whatever appropriate in your development environment. However, if you've setup your environment different than that, you will have to create a configuration file for that.
+You should be able to test it via your browser. Just go to `http://localhost` or `http://localhost:8000` or whatever appropriate in your development environment. However, if you've setup your environment different than that, you will have to create a configuration file for that.
 
 ####Allowable Domain Configuration
 The API class, by default, will first check to see if the calling party is from the allowable host or domain. If it is originate from the domain other than the ones configured, it will return an error.
