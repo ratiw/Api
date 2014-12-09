@@ -59,13 +59,13 @@ class ApiController extends \Controller
     {
         return in_array(
             $host,
-            \Config::get('api.allow_hosts', 'localhost')
+            \Config::get('api.allow_hosts', ['localhost', 'localhost:8000'])
         );
     }
 
     public function checkAllowablePaths()
     {
-        $allowablePaths = \Config::get('api.allow_paths', 'api/*');
+        $allowablePaths = \Config::get('api.allow_paths', ['api/*']);
 
         foreach ($allowablePaths as $path)
         {
