@@ -134,13 +134,73 @@ return [
 ];
 
 ```
+####Sort Operations
+Sort operation can be done by passing `sort` parameter in the query string when calling the Api controller.
+```
+http://localhost:8000/clients?sort=shortname
+```
+To sort in descending order, just prepend the sort column with `-`
+```
+http://localhost:8000/clients?sort=-shortname
+```
 
-####Search Operations
+####Filtering Results
+The results can be filtered by specifying the the `q` parameter in the query string. 
+```
+http://localhost:8000/clients?q=John
+```
+By default, it will perform `where` clause on the field named `code`, which will cause error if your model does not have `code` field.
+You can fix this by overriding the `search()` method, like so.
+```php
+	...
+	protected function search($query, $searchStr)
+	{
+		return $query->where('shortname', 'like', "%$searchStr%")
+			->where('name', 'like', '%$searchStr%');
+	}
+	...
+```
+
+####Paginated Results
+The returned or transformed result is paginated by default to 10 records. To change this, just pass `per_page` parameter on the query string.
+```
+http://localhost:8000/clients?per_page=20
+```
 
 ####Eager Load the results
-To eager load the result of the query, just specifying it in the `$
+To eager load the result of the query, just specifying it in the `$eagerLoads` array property of the Api class.
+```php
+...
+class ClientsController extends BaseApiController
+{
+	$protected $eagerLoads = ['saleRep'];
+	...
+}
+```
 ####Specifying Transformer class
+
 
 ####Overriding Transformer Path
 
-####Embedded Resource
+
+####Embedded Resources in Transformer
+```php
+...
+class ClientTransformer extends BaseTransformer
+{
+	protected $defaultIncludes = ['saleRep'];
+
+	public function transform($client)
+	{
+		...
+	}
+
+    public function includeSaleRep($client)
+    {
+        $saleRep = $client->saleRep;
+
+        return $this->item($saleRep, new SaleTransformer);
+    }
+
+}
+```
