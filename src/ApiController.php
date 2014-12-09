@@ -21,9 +21,7 @@ class ApiController extends \Controller
     protected $statusCode = 200;
     protected $perPage = 10;
     protected $perPageLimit = 100;
-    protected $model = null;
-    protected $transformer = null;
-    protected $transformerBasePath = 'Api\\Transformers\\';
+
     /**
      * @var Manager
      */

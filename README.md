@@ -135,10 +135,11 @@ return [
 
 ```
 
-####Search
+####Search Operations
 
-
-###Specifying Transformer class
+####Eager Load the results
+To eager load the result of the query, just specifying it in the `$
+####Specifying Transformer class
 
 ####Overriding Transformer Path
 

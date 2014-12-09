@@ -14,6 +14,10 @@ class BaseApiController extends ApiController
     protected $sortColumn = 'id';
     protected $sortDirection = 'asc';
 
+    protected $model = null;
+    protected $transformer = null;
+    protected $transformerBasePath = 'Api\\Transformers\\';
+
     protected $eagerLoads = [];
 
     function __construct(Application $app, Manager $fractal)
