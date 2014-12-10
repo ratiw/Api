@@ -16,7 +16,7 @@ class BaseApiController extends ApiController
 
     protected $model = null;
     protected $transformer = null;
-    protected $transformerBasePath = 'Api\\Transformers\\';
+    protected $transformerBasePath = '';
 
     protected $eagerLoads = [];
 
@@ -25,6 +25,8 @@ class BaseApiController extends ApiController
         parent::__construct($fractal);
 
         $this->app = $app;
+
+        $this->transformerBasePath = str_finish(\Config::get('api.transformer_path', ''), '\\');
 
         is_null($this->model) and $this->model = $this->guessModelName();
         is_null($this->transformer) and $this->transformer = $this->getTransformer($this->model);
@@ -55,7 +57,7 @@ class BaseApiController extends ApiController
         $modelName = class_basename($modelName);
         $className = $this->transformerBasePath . "${modelName}Transformer";
 
-        return class_exists($className) ? $className : $this->transformerBasePath . "BaseTransformer";
+        return class_exists($className) ? $className : 'Ratiw\Api\BaseTransformer';
     }
 
     public function index()
