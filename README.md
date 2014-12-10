@@ -108,6 +108,8 @@ By default, the API package comes ready with two methods
 
 You should be able to test it via your browser. Just go to `http://localhost` or `http://localhost:8000` or whatever appropriate in your development environment. However, if you've setup your environment different than that, you will have to create a configuration file for that.
 
+__Note:__ If you use Google Chrome browser, you can install [JSONView](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) from Chrome Web Store to help prettify the JSON result.
+
 ####Allowable Domain Configuration
 The API class, by default, will first check to see if the calling party is from the allowable host or domain. If it is originate from the domain other than the ones configured, it will return an error.
 
@@ -178,12 +180,40 @@ class ClientsController extends BaseApiController
 }
 ```
 ####Specifying Transformer class
+API package will automatically looks for a corresponding Transformer class using the following criteria:
 
+- Use the transformer class specified in `$transformer` property. If the transformer does not exist, exception will be thrown.
+- Use the base name of the specified `$model` property to guess the transformer class. If the transformer class does not exist, the `Ratiw\Api\BaseTransformer` class will be used.
+
+This provides enough ease and flexibility. If your project it is *small and not so complicated*, you can just put the Api classes and transformer classes in the same directory. Or, you won't even have to define any transformer for the Api class if you do not need to transform anything.
+
+But if your project is quite complex or you prefer putting things in directory where you can organized things neatly, you have the flexibility to do so by specifying the `$transformer` class to use in the Api class.
+```php
+...
+class ClientsController extends BaseApiController
+{
+	protected $model = 'Entities\Clients\Client';
+
+	protected $transformer = 'Api\Transformers\ClientTransformer';
+	...
+}
+...
+```
 
 ####Overriding Transformer Path
-
+By default, the Api class will look for its associated Transformer class in the same directory, but you can override this by putting the `transformer_path` in the `app/config/api.php` file.
+```php
+<?php
+return [
+	'allowable_path' => [...];
+	...
+	'transformer_path' => 'Api\\Transfomers\\';
+];
+```
+__Note__ the double backslash `\\` in the path. Double backslash at the end is not required though.
 
 ####Embedded Resources in Transformer
+Embbed resources (nested resources) can be included using the machanism defined by `Fractal`.
 ```php
 ...
 class ClientTransformer extends BaseTransformer
