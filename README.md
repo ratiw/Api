@@ -6,9 +6,10 @@ A simple Laravel based API package using [Fractal](http://fractal.thephpleague.c
 This package simplify the API request building and transforming using The PHP Leagues's `Fractal` as the underlying engine.
 
 To use it, you just need to follow these 3 steps
-	1. Create API endpoint by extending the `Ratiw\Api\BaseApiController` class.
-	2. Create Transformer by extending `Ratiw\Api\BaseTransformer` class.
-	3. Create a route for it.
+
+- Create API endpoint by extending the `Ratiw\Api\BaseApiController` class.
+- Create Transformer by extending `Ratiw\Api\BaseTransformer` class.
+- Create a route for it.
 
 Installation
 ----
@@ -20,13 +21,13 @@ Installation can be done via `composer`
     "ratiw/api": "dev-master"
 }
 ```
-This package requires `Laravel Framework` and `Fractal`, so it will be pull in automatically
+This package requires `Laravel Framework` v4.2 and `Fractal` v0.9.*, so it will be pull in automatically
 
 Usage
 ----
 ####Let's make the assumptions
 - The API code will be in `Api` directory.
-- The following PSR-4 namespaces were defined in `composer.json' like so
+- The following PSR-4 namespaces were defined in `composer.json` like so
 ```json
 	...
 	"autoload": {
@@ -66,7 +67,8 @@ class ClientsController extends BaseApiController
 }
 ```
 
-#### Createing Transformer class
+#### Createing Transformer class (optional)
+This is optional though. You don't need to create a Transformer if you don't want to transform any field.
 ```php
 <?php namespace Api\Transformers;
 
@@ -182,10 +184,10 @@ class ClientsController extends BaseApiController
 ####Specifying Transformer class
 API package will automatically looks for a corresponding Transformer class using the following criteria:
 
-- Use the transformer class specified in `$transformer` property. If the transformer does not exist, exception will be thrown.
-- Use the base name of the specified `$model` property to guess the transformer class. If the transformer class does not exist, the `Ratiw\Api\BaseTransformer` class will be used.
+- Use the Transformer class specified in `$transformer` property. If the Transformer does not exist, exception will be thrown.
+- Use the base name of the specified `$model` property to guess the Transformer class. If the Transformer class does not exist, the `Ratiw\Api\BaseTransformer` class will be used.
 
-This provides enough ease and flexibility. If your project it is *small and not so complicated*, you can just put the Api classes and transformer classes in the same directory. Or, you won't even have to define any transformer for the Api class if you do not need to transform anything.
+This provides enough ease and flexibility. If your project is *small and not so complicated*, you can just put the Api classes and Transformer classes in the same directory. Or, you won't even have to define any Transformer for the Api class if you do not need to transform anything.
 
 But if your project is quite complex or you prefer putting things in directory where you can organized things neatly, you have the flexibility to do so by specifying the `$transformer` class to use in the Api class.
 ```php
