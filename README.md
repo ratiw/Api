@@ -165,10 +165,33 @@ You can fix this by overriding the `search()` method, like so.
 	...
 ```
 
+####Specifing Default Filters
+If you want to always apply specific conditions to the query result, you can specify them in the `$defaultFilters` array property.
+
+```php
+class ClientsController extends BaseApiController
+{
+	...
+    public function index()
+    {
+        $this->defaultFilters['sale_id'] = ['=', Auth::id()];
+
+        return parent::index();
+    }
+	...
+}
+```
+
 ####Paginated Results
 The returned or transformed result is paginated by default to 10 records. To change this, just pass `per_page` parameter on the query string.
 ```
 http://localhost:8000/clients?per_page=20
+```
+
+####Limiting Transformed Output Fields
+You can limit the fields to be returned by supplying the `fields` parameter on the query string, like so.
+```
+http://localhost:8000/clients?fields=id,name
 ```
 
 ####Eager Load the results
