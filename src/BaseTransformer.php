@@ -6,9 +6,28 @@ class BaseTransformer extends TransformerAbstract
 {
     protected $fields = [];
 
-    public function transform($data)
+    protected $transformOnlyFields = [];
+
+    public function transformOnly(array $only)
+    {
+        $this->transformOnlyFields = $only;
+    }
+
+    protected function modelTransform($data)
     {
         return $data->toArray();
+    }
+
+    public function transform($data)
+    {
+        $data = $this->modelTransform($data);
+
+        if ( ! empty($this->transformOnlyFields))
+        {
+            $data = array_only($data, $this->transformOnlyFields);
+        }
+
+        return $data;
     }
 
     public function untransform($input)
@@ -33,10 +52,10 @@ class BaseTransformer extends TransformerAbstract
         {
             if (array_key_exists($key, $fields))
             {
-                $output[$fields[$key]] = $value;
+                $output[$fields[$key]] = trim($value);
             }
             else{
-                $output[$key] = $value;
+                $output[$key] = trim($value);
             }
         }
 

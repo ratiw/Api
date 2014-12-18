@@ -69,6 +69,13 @@ class BaseApiController extends ApiController
         $this->setSortOrder(Input::get('sort', ''));
         $this->setPerPage(Input::get('per_page', ''));
 
+        if (Input::has('fields'))
+        {
+            $this->transformer->transformOnly(
+                preg_split('/\s*,\s*/', Input::get('fields'))
+            );
+        }
+
         $filters = array_except(Input::all(), ['q', 'sort', 'page', 'per_page', 'fields', 'embeds', 'include']);
         /*
                 $meta = [
@@ -99,7 +106,7 @@ class BaseApiController extends ApiController
                 ->paginate($this->perPage);
             $data->appends(compact('q', 'filter', 'sort'));
         }
-        return $this->respondWithPagination($data, new $this->transformer, $meta);
+        return $this->respondWithPagination($data, $this->transformer, $meta);
     }
 
     protected function query()
@@ -120,7 +127,7 @@ class BaseApiController extends ApiController
             return $this->errorNotFound();
         }
 
-        return $this->respondWithCollection($data, new $this->transformer);
+        return $this->respondWithCollection($data, $this->transformer);
     }
 
     public function setFilters($query, $filters)
