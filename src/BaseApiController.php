@@ -1,5 +1,6 @@
 <?php namespace Ratiw\Api;
 
+use Auth;
 use Illuminate\Foundation\Application;
 use League\Fractal\Manager;
 use Input;
@@ -19,6 +20,8 @@ class BaseApiController extends ApiController
     protected $transformerBasePath = '';
 
     protected $eagerLoads = [];
+
+    protected $defaultFilters = [];
 
     function __construct(Application $app, Manager $fractal)
     {
@@ -124,9 +127,21 @@ class BaseApiController extends ApiController
     {
         $filters = $this->transformer->untransform($filters);
 
+        if ( ! empty($this->defaultFilters))
+        {
+            $filters = array_merge($this->defaultFilters, $filters);
+        }
+
         foreach ($filters as $key => $value)
         {
-            $query->where($key, $value);
+            if (is_array($value))
+            {
+                $query->where($key, $value[0], $value[1]);
+            }
+            else
+            {
+                $query->where($key, $value);
+            }
         }
 
         return $this;
