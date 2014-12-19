@@ -157,26 +157,25 @@ By default, it will perform `where` clause on the field named `code`, which will
 You can fix this by overriding the `search()` method, like so.
 ```php
 	...
-	protected function search($query, $searchStr)
+	protected function search($query, $q)
 	{
-		return $query->where('shortname', 'like', "%$searchStr%")
-			->where('name', 'like', '%$searchStr%');
+		return $query->where('shortname', 'like', "%$q%")
+			->orWhere('name', 'like', '%$q%');
 	}
 	...
 ```
 
 ####Specifing Default Filters
-If you want to always apply specific conditions to the query result, you can specify them in the `$defaultFilters` array property.
+If you want to always apply specific conditions to the query result, you can do so by overriding `getDefaultFilters` function.
+The `query builder` object will be passed to this function and you can apply any condition you want.
 
 ```php
 class ClientsController extends BaseApiController
 {
 	...
-    public function index()
+    public function getDefaultFilters($query)
     {
-        $this->defaultFilters['sale_id'] = ['=', Auth::id()];
-
-        return parent::index();
+        return $query->where('sale_id', Auth::id());
     }
 	...
 }
