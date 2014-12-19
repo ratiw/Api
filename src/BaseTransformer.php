@@ -13,6 +13,11 @@ class BaseTransformer extends TransformerAbstract
         $this->transformOnlyFields = $only;
     }
 
+    public function getTransformOnlyFields()
+    {
+        return $this->transformOnlyFields;
+    }
+
     protected function modelTransform($data)
     {
         return $data->toArray();
