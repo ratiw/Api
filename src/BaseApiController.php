@@ -22,6 +22,8 @@ class BaseApiController extends ApiController
     protected $eagerLoads = [];
 
     protected $defaultFilters = [];
+    protected $filters = [];
+    protected $searchQuery;
 
     function __construct(Application $app, Manager $fractal)
     {
@@ -29,6 +31,11 @@ class BaseApiController extends ApiController
 
         $this->app = $app;
 
+        $this->init();
+    }
+
+    public function init()
+    {
         $this->transformerBasePath = str_finish(\Config::get('api.transformer_path', ''), '\\');
 
         is_null($this->model) and $this->model = $this->guessModelName();
@@ -36,12 +43,6 @@ class BaseApiController extends ApiController
 
         $this->model = $this->app->make($this->model);
         $this->transformer = $this->app->make($this->transformer);
-
-        $this->init();
-    }
-
-    public function init()
-    {
     }
 
     protected function guessModelName()
@@ -65,9 +66,10 @@ class BaseApiController extends ApiController
 
     public function index()
     {
-        $q = Input::get('q', '');
-        $this->setSortOrder(Input::get('sort', ''));
-        $this->setPerPage(Input::get('per_page', ''));
+        $this->setSearchQuery($q = Input::get('q', ''));
+        $this->setSortOrder($sort = Input::get('sort', ''));
+        $this->setPerPage($per_page = Input::get('per_page', ''));
+        $page = Input::get('page', '');
 
         if (Input::has('fields'))
         {
@@ -76,14 +78,15 @@ class BaseApiController extends ApiController
             );
         }
 
-        $filters = array_except(Input::all(), ['q', 'sort', 'page', 'per_page', 'fields', 'embeds', 'include']);
+        $filters = $this->extractFilters(Input::all());
         /*
-                $meta = [
-                    'base_url' => Request::url(),
-                    'search'   => $q,
-                    'filter'   => $filter,
-                    'sort'     => $sort
-                ];
+            // set metadata
+            $meta = [
+                'base_url' => Request::url(),
+                'search'   => $q,
+                'filter'   => $filter,
+                'sort'     => $sort
+            ];
         */
         $meta = [];
 
@@ -91,7 +94,7 @@ class BaseApiController extends ApiController
         {
             $data = $this->query()
                 ->where(function($query) use($filters) {
-                    $this->setFilters($query, $filters);
+                    $this->applyFilters($query, $filters);
                 })
                 ->orderBy($this->sortColumn, $this->sortDirection)
                 ->paginate($this->perPage);
@@ -100,13 +103,24 @@ class BaseApiController extends ApiController
         {
             $data = $this->search($this->query(), $q)
                 ->where(function($query) use($filters) {
-                    $this->setFilters($query, $filters);
+                    $this->applyFilters($query, $filters);
                 })
                 ->orderBy($this->sortColumn, $this->sortDirection)
                 ->paginate($this->perPage);
-            $data->appends(compact('q', 'filter', 'sort'));
+
+            $data->appends(compact('q', 'sort', 'page', 'per_page', 'filters', 'fields', 'include'));
         }
         return $this->respondWithPagination($data, $this->transformer, $meta);
+    }
+
+    /**
+     * @return array
+     */
+    private function extractFilters($input)
+    {
+        $filters = array_except($input, ['q', 'sort', 'page', 'per_page', 'fields', 'include']);
+
+        return $filters;
     }
 
     protected function query()
@@ -130,7 +144,12 @@ class BaseApiController extends ApiController
         return $this->respondWithCollection($data, $this->transformer);
     }
 
-    public function setFilters($query, $filters)
+    public function setSearchQuery($q)
+    {
+        $this->searchQuery = $q;
+    }
+
+    public function applyFilters($query, $filters)
     {
         $filters = $this->transformer->untransform($filters);
 
@@ -141,24 +160,34 @@ class BaseApiController extends ApiController
 
         foreach ($filters as $key => $value)
         {
-            if (is_array($value))
-            {
-                $query->where($key, $value[0], $value[1]);
-            }
-            else
-            {
-                $query->where($key, $value);
-            }
+            $this->applyFilter($query, $key, $value);
         }
 
         return $this;
     }
 
-    public function setPerPage($perPage)
+    /**
+     * @param $query
+     * @param $key
+     * @param $value
+     */
+    private function applyFilter($query, $key, $value)
     {
-        if (empty($perPage)) return;
-
-        $this->perPage = $perPage;
+        if (is_array($value))
+        {
+            if (count($value) > 2)
+            {
+                $query->where($value[0], $value[1], $value[2]);
+            }
+            else
+            {
+                $query->where($value[0], $value[1]);
+            }
+        }
+        else
+        {
+            $query->where($key, $value);
+        }
     }
 
     public function setSortOrder($sort)
@@ -174,6 +203,7 @@ class BaseApiController extends ApiController
         }
         $this->sortColumn = $this->transformer->untransform(str_replace('-', '', $sort));
     }
+
     /*
         public function destroy($id)
         {
