@@ -1,5 +1,6 @@
 <?php namespace Ratiw\Api;
 
+use Illuminate\Pagination\Paginator;
 use Request;
 use Exception;
 use Illuminate\Http\Response;
@@ -222,5 +223,22 @@ class ApiController extends \Controller
         {
             $resource->setMetaValue($metaKey, $metaValue);
         }
+    }
+
+    protected function formatResponse(Paginator $query)
+    {
+        return [
+            "data" => $query->toArray()['data'],
+            "meta" => [
+                "pagination" => [
+                    "total"        => $query->getTotal(),
+                    "count"        => $query->count(),
+                    "per_page"     => $query->getPerPage(),
+                    "current_page" => $query->getCurrentPage(),
+                    "total_pages"  => $query->getLastPage(),
+                    "links"        => []
+                ]
+            ],
+        ];
     }
 }
