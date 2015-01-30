@@ -165,7 +165,19 @@ class ApiController extends \Controller
     protected function respondWithCollection($collection, $transformer, $paginator = null, $meta = [])
     {
         $resource = new Collection($collection, $transformer);
-        is_null($paginator) or $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
+
+        if ( ! is_null($paginator))
+        {
+            $paginatorAdapter = new IlluminatePaginatorAdapter($paginator);
+
+            $queryParams = array_diff_key($_GET, array_flip(['page']));
+            foreach ($queryParams as $key => $value)
+            {
+                $paginatorAdapter->addQuery($key, $value);
+            }
+
+            $resource->setPaginator($paginatorAdapter);
+        }
 
         empty($meta) or $this->addMetadata($resource, $meta);
 
@@ -225,20 +237,76 @@ class ApiController extends \Controller
         }
     }
 
-    protected function formatResponse(Paginator $query)
+    protected function formatResponse(Paginator $paginator, BaseTransformer $transformer = null)
     {
+        $data = $paginator->getCollection();
+
+        if ( ! is_null($transformer))
+        {
+            $data = $this->transformData($data, $transformer);
+        }
+
+        $this->appendsQueryString($paginator);
+
         return [
-            "data" => $query->toArray()['data'],
+            "data" => $data,
             "meta" => [
-                "pagination" => [
-                    "total"        => $query->getTotal(),
-                    "count"        => $query->count(),
-                    "per_page"     => $query->getPerPage(),
-                    "current_page" => $query->getCurrentPage(),
-                    "total_pages"  => $query->getLastPage(),
-                    "links"        => []
-                ]
+                "pagination" => $this->getPagination($paginator)
             ],
         ];
+    }
+
+    protected function transformData($data, $transformer)
+    {
+        $transformed = [];
+
+        foreach ($data as $item)
+        {
+            $transformed[] = $transformer->transform($item);
+        }
+
+        return $transformed;
+    }
+
+    /**
+     * @param Paginator $paginator
+     */
+    protected function appendsQueryString(Paginator $paginator)
+    {
+        $queryParams = array_diff_key($_GET, array_flip(['page']));
+        foreach ($queryParams as $key => $value)
+        {
+            $paginator->addQuery($key, $value);
+        }
+    }
+
+    /**
+     * @param Paginator $paginator
+     * @return array
+     */
+    protected function getPagination(Paginator $paginator)
+    {
+        $currentPage = $paginator->getCurrentPage();
+        $lastPage = $paginator->getLastPage();
+
+        $links = [];
+        if ($currentPage > 1)
+        {
+            $links['previous'] = $paginator->getUrl($currentPage - 1);
+        }
+        if ($currentPage < $lastPage)
+        {
+            $links['next'] = $paginator->getUrl($currentPage + 1);
+        }
+
+        $pagination = [];
+        $pagination['total'] = $paginator->getTotal();
+        $pagination['count'] = $paginator->count();
+        $pagination['per_page'] = $paginator->getPerPage();
+        $pagination['current_page'] = $currentPage;
+        $pagination['total_pages'] = $lastPage;
+        $pagination['links'] = $links;
+
+        return $pagination;
     }
 }
