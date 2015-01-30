@@ -170,11 +170,7 @@ class ApiController extends \Controller
         {
             $paginatorAdapter = new IlluminatePaginatorAdapter($paginator);
 
-            $queryParams = array_diff_key($_GET, array_flip(['page']));
-            foreach ($queryParams as $key => $value)
-            {
-                $paginatorAdapter->addQuery($key, $value);
-            }
+            $this->appendsQueryString($paginatorAdapter);
 
             $resource->setPaginator($paginatorAdapter);
         }
@@ -270,6 +266,7 @@ class ApiController extends \Controller
 
     /**
      * @param Paginator $paginator
+     * @return Paginator
      */
     protected function appendsQueryString(Paginator $paginator)
     {
