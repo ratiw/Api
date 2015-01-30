@@ -45,7 +45,7 @@ class BaseApiController extends ApiController
 
         $this->setSearchQuery(Input::get('q', ''));
         $this->setSortOrder(Input::get('sort', ''));
-        $this->setPerPage(Input::get('per_page', ''));
+        $this->setPerPage(Input::get('per_page', $this->perPage));
         $this->setFilters(Input::all());
         $page = Input::get('page', '');
 
@@ -89,18 +89,9 @@ class BaseApiController extends ApiController
         */
         $meta = [];
 
-        $data = $this->query()->paginate($this->perPage);
+        $paginator = $this->query()->paginate($this->perPage);
 
-        $data->appends([
-            'q' => $this->searchQuery,
-            'sort' => $this->getSortOrder(),
-            'per_page' => $this->perPage,
-            'filters' => $this->array_implode('&', $this->filters),
-            'fields' => implode(',', $this->transformer->getTransformOnlyFields()),
-            'include' => Input::get('include', '')
-        ]);
-
-        return $this->respondWithPagination($data, $this->transformer, $meta);
+        return $this->respondWithPagination($paginator, $this->transformer, $meta);
     }
 
     /**
