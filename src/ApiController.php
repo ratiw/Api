@@ -23,6 +23,16 @@ class ApiController extends \Controller
     protected $perPage = 10;
     protected $perPageLimit = 100;
 
+    protected $noData = [
+        "data" => [],
+        "meta" => [
+            "pagination" => [
+                "count" => 0,
+                "total" => 0
+            ]
+        ]
+    ];
+
     /**
      * @var Manager
      */
