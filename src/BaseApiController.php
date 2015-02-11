@@ -1,6 +1,5 @@
 <?php namespace Ratiw\Api;
 
-use Auth;
 use Illuminate\Foundation\Application;
 use League\Fractal\Manager;
 use Input;
@@ -107,14 +106,25 @@ class BaseApiController extends ApiController
         $query = $this->model->with($this->eagerLoads)
             ->orderBy($this->sortColumn, $this->sortDirection);
 
+        $query = $this->applySearch($query);
+
+        return $this->applyFilters($query, $this->filters);
+    }
+
+    /**
+     * @param $query
+     */
+    protected function applySearch($query)
+    {
         if ( ! empty($this->searchQuery))
         {
-            $query->where(function($query) {
+            $query->where(function ($query)
+            {
                 $this->search($query, $this->searchQuery);
             });
         }
 
-        return $this->applyFilters($query, $this->filters);
+        return $query;
     }
 
     protected function search($query, $q)
